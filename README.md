@@ -48,6 +48,19 @@ syncfit-simulator/
 
 Python 3.11+ (NumPy) and TypeScript / Node (WebSocket client).
 
+## Tasks
+
+### Requirements
+
+- [ ] `py/` — implement synthetic PPG, thermal and load signal generation.
+- [ ] `py/` — implement replay of captured samples.
+- [ ] `py/` — implement the pipeline harness that feeds `syncfit-core` and the backend.
+- [ ] `ts/` — implement the synthetic telemetry generator.
+- [ ] `ts/` — implement the reference WebSocket client typed from `syncfit-contracts`.
+- [ ] Define scenarios for normal, fatigue and high-risk cases.
+- [ ] Ensure all generated output validates against `syncfit-contracts`.
+- [ ] Document how to run each scenario end to end.
+
 ## Related repositories
 
 - [`syncfit-contracts`](../syncfit-contracts) — schema for generated data.
