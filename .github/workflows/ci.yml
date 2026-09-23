@@ -1,0 +1,75 @@
+# NOTE: this repository depends on the private siblings syncfit-contracts and
+# syncfit-core, cloned here using the SYNCFIT_TOKEN secret.
+# TODO: when those repositories are public, remove the `token:` inputs and delete
+# the SYNCFIT_TOKEN secret.
+name: CI
+
+on:
+  push:
+    branches: [main, "feature/**"]
+  pull_request:
+
+jobs:
+  python:
+    name: Python simulator
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout sibling syncfit-contracts
+        uses: actions/checkout@v4
+        with:
+          repository: Jenifrutica/syncfit-contracts
+          path: deps/syncfit-contracts
+          ref: main
+          token: ${{ secrets.SYNCFIT_TOKEN }}
+      - name: Checkout sibling syncfit-core
+        uses: actions/checkout@v4
+        with:
+          repository: Jenifrutica/syncfit-core
+          path: deps/syncfit-core
+          ref: main
+          token: ${{ secrets.SYNCFIT_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install ./deps/syncfit-contracts/python ./deps/syncfit-core
+          pip install --no-deps -e ./py
+          pip install pytest numpy
+      - name: Test
+        run: pytest py/tests -q
+
+  typescript:
+    name: TypeScript simulator
+    runs-on: ubuntu-latest
+    env:
+      SYNCFIT_SCHEMA_DIR: ${{ github.workspace }}/deps/syncfit-contracts/schemas
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout sibling syncfit-contracts
+        uses: actions/checkout@v4
+        with:
+          repository: Jenifrutica/syncfit-contracts
+          path: deps/syncfit-contracts
+          ref: main
+          token: ${{ secrets.SYNCFIT_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+      - name: Install
+        working-directory: typescript
+        run: npm ci
+      - name: Typecheck
+        working-directory: typescript
+        run: npm run typecheck
+      - name: Test
+        working-directory: typescript
+        run: npm test

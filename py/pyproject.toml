@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "syncfit-simulator"
+version = "0.1.0"
+description = "SyncFit Edge simulator: synthetic and replayable telemetry (Python)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "numpy>=1.26",
+    "syncfit-contracts @ git+https://github.com/Jenifrutica/syncfit-contracts.git#subdirectory=python",
+    "syncfit-core @ git+https://github.com/Jenifrutica/syncfit-core.git",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.setuptools]
+packages = ["syncfit_simulator"]
+
+[tool.setuptools.package-data]
+syncfit_simulator = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
