@@ -96,6 +96,26 @@ npm run typecheck
 npm test
 ```
 
+### Routine generation (muscle groups + i18n)
+
+Builds a safe, localized routine from the shared exercise catalog, selecting one
+or more muscle groups (isolated, region or pattern) and respecting an impact cap:
+
+```bash
+python -m syncfit_simulator --groups GLUTES,QUADRICEPS --language ES --per-group 2
+python -m syncfit_simulator --groups UPPER_BODY --language ZH
+python -m syncfit_simulator --groups FULL_LEG --max-impact LOW   # safe, low-impact only
+```
+
+```python
+from syncfit_simulator import build_routine, muscle_group_catalog
+
+routine = build_routine(["GLUTES", "ABS"], language="ES")  # RoutineResponse-shaped
+```
+
+Each exercise carries a localized name/description, a free-use `image_url`, its
+muscle groups and impact, and a `media_url` reserved for future videos.
+
 ## Stack
 
 Python 3.11+ (NumPy, `syncfit-contracts`, `syncfit-core`) and TypeScript / Node (ajv, vitest).
