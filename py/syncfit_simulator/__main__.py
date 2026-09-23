@@ -3,7 +3,7 @@
 Usage:
     python -m syncfit_simulator --scenario fatigue --frames 3
     python -m syncfit_simulator --list-scenarios
-    python -m syncfit_simulator --scenario high_risk --save captures/high_risk.json
+    python -m syncfit_simulator --groups GLUTES,QUADRICEPS --language ES
 """
 
 from __future__ import annotations
@@ -14,6 +14,7 @@ import json
 from .generator import generate_session
 from .harness import run_frames
 from .replay import save_capture
+from .routine import build_routine
 from .scenarios import get_scenario, scenario_names
 
 
@@ -25,12 +26,28 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--save", help="write the generated frames to a capture file")
     parser.add_argument("--no-run", action="store_true", help="only generate, do not run core")
     parser.add_argument("--list-scenarios", action="store_true")
+    parser.add_argument("--groups", help="comma-separated muscle groups to build a routine")
+    parser.add_argument("--language", default="EN", help="routine language: EN, ES, ZH")
+    parser.add_argument("--per-group", type=int, default=2)
+    parser.add_argument("--max-impact", default="HIGH", choices=["LOW", "MEDIUM", "HIGH"])
     args = parser.parse_args(argv)
 
     if args.list_scenarios:
         for name in scenario_names():
             scenario = get_scenario(name)
             print(f"{name:16s} {scenario.description}")
+        return 0
+
+    if args.groups:
+        groups = [g.strip() for g in args.groups.split(",") if g.strip()]
+        routine = build_routine(
+            groups,
+            language=args.language,
+            exercises_per_group=args.per_group,
+            max_impact=args.max_impact,
+            session_id=args.session_id,
+        )
+        print(json.dumps(routine, indent=2, ensure_ascii=False))
         return 0
 
     scenario = get_scenario(args.scenario)

@@ -29,6 +29,14 @@ from .replay import (
     replay_file,
     save_capture,
 )
+from .routine import (
+    DEFAULT_EXERCISES_PER_GROUP,
+    build_routine,
+    build_routine_from_request,
+    muscle_group_catalog,
+    select_exercises,
+    to_adaptation,
+)
 from .scenarios import SCENARIOS, Scenario, get_scenario, scenario_names
 from .structures import EventScript, FrameBuffer
 
@@ -62,4 +70,10 @@ __all__ = [
     "list_captures",
     "replay",
     "replay_file",
+    "DEFAULT_EXERCISES_PER_GROUP",
+    "build_routine",
+    "build_routine_from_request",
+    "muscle_group_catalog",
+    "select_exercises",
+    "to_adaptation",
 ]
