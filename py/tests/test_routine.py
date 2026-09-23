@@ -70,5 +70,39 @@ def test_muscle_group_catalog_has_glutes():
     assert "GLUTES" in catalog and len(catalog["GLUTES"]) >= 1
 
 
+def test_routine_has_warmup_sets_and_timing():
+    result = build_routine(["GLUTES", "QUADRICEPS"], include_warmup=True)
+    model = RoutineResponse.model_validate(result)
+    assert model.warmup, "expected a warm-up block"
+    assert model.total_estimated_minutes and model.total_estimated_minutes > 0
+    main = model.routine[0]
+    types = {s.type for s in main.sets}
+    assert "APPROXIMATION" in types
+    assert "EFFECTIVE" in types
+    assert main.estimated_seconds and main.estimated_seconds > 0
+    assert main.rest_seconds
+
+
+def test_time_budget_trims_exercises():
+    full = build_routine(["UPPER_BODY"], exercises_count=6, include_warmup=True)
+    short = build_routine(
+        ["UPPER_BODY"], exercises_count=6, include_warmup=True, time_budget_minutes=20
+    )
+    assert len(short["routine"]) <= len(full["routine"])
+    assert short["total_estimated_minutes"] <= full["total_estimated_minutes"]
+
+
+def test_warmup_can_be_disabled():
+    result = build_routine(["GLUTES"], include_warmup=False)
+    assert result["warmup"] == []
+
+
+def test_activation_role_present():
+    result = build_routine(["GLUTES"], include_warmup=True)
+    roles = {entry["role"] for entry in result["warmup"]}
+    assert roles & {"WARMUP", "ACTIVATION"}
+
+
+
 def _flat(groups):
     return {str(g) for g in groups}
