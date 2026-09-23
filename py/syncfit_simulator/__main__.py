@@ -29,6 +29,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--groups", help="comma-separated muscle groups to build a routine")
     parser.add_argument("--language", default="EN", help="routine language: EN, ES, ZH")
     parser.add_argument("--per-group", type=int, default=2)
+    parser.add_argument("--count", type=int, default=None, help="main exercises (default 5)")
+    parser.add_argument("--time-budget", type=int, default=None, help="minutes")
+    parser.add_argument("--no-warmup", action="store_true")
     parser.add_argument("--max-impact", default="HIGH", choices=["LOW", "MEDIUM", "HIGH"])
     args = parser.parse_args(argv)
 
@@ -46,6 +49,9 @@ def main(argv: list[str] | None = None) -> int:
             exercises_per_group=args.per_group,
             max_impact=args.max_impact,
             session_id=args.session_id,
+            exercises_count=args.count,
+            time_budget_minutes=args.time_budget,
+            include_warmup=not args.no_warmup,
         )
         print(json.dumps(routine, indent=2, ensure_ascii=False))
         return 0
