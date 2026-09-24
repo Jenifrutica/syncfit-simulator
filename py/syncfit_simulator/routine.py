@@ -104,6 +104,8 @@ def to_adaptation(
         "muscle_groups": list(exercise.muscle_groups),
         "impact": _value(exercise.impact),
         "description": _localized_text(exercise.description),
+        "how_to": _localized_text(exercise.how_to) if exercise.how_to else None,
+        "tips": [_localized_text(t) for t in (exercise.tips or [])],
         "image_url": exercise.image_url,
         "media_url": exercise.media_url,
         "role": role,
