@@ -2,7 +2,7 @@
   "name": "@syncfit/simulator",
   "version": "0.1.0",
   "description": "SyncFit Edge simulator: synthetic telemetry and WebSocket client (TypeScript).",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
