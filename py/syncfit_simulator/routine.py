@@ -178,14 +178,21 @@ def build_routine(
 ) -> dict:
     """Build a validated `RoutineResponse`-shaped dictionary."""
     groups = [_value(g) for g in muscle_groups]
-    count = exercises_count or DEFAULT_EXERCISES_COUNT
-
     warmup: list[dict] = []
     if include_warmup:
         warmup = [to_adaptation(e, language, max_impact) for e in _select_warmup(groups, 2)]
 
-    main = select_exercises(groups, exercises_per_group=count, max_impact=max_impact)
+    if exercises_count:
+        per_group = max(1, -(-exercises_count // len(groups)))
+        cap: int | None = exercises_count
+    else:
+        per_group = exercises_per_group
+        cap = None
+
+    main = select_exercises(groups, exercises_per_group=per_group, max_impact=max_impact)
     routine = [to_adaptation(e, language, max_impact) for e in main]
+    if cap is not None:
+        routine = routine[:cap]
 
     if time_budget_minutes:
         budget_seconds = time_budget_minutes * 60
