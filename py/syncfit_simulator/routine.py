@@ -16,6 +16,7 @@ from syncfit_contracts import (
     RoutineRequest,
     RoutineResponse,
     exercises_for_groups,
+    load_exercises,
     localize,
 )
 
@@ -154,6 +155,15 @@ def _select_warmup(muscle_groups: Iterable[str], limit: int = 2) -> list[Exercis
             selected.append(exercise)
             if len(selected) >= limit:
                 return selected
+    # Fallback: any warm-up/activation exercise so the block is never empty.
+    if len(selected) < limit:
+        for exercise in load_exercises():
+            role = _value(getattr(exercise, "role", "MAIN"))
+            if role in ("WARMUP", "ACTIVATION") and exercise.id not in seen:
+                seen.add(exercise.id)
+                selected.append(exercise)
+                if len(selected) >= limit:
+                    break
     return selected
 
 
