@@ -144,3 +144,23 @@ Python 3.11+ (NumPy, `syncfit-contracts`, `syncfit-core`) and TypeScript / Node 
 - [`syncfit-hardware`](https://github.com/Jenifrutica/syncfit-hardware) — replaced by this layer while real captures are recorded.
 
 All code, comments, documentation and commits in this repository are written in English.
+
+## Context for a new session
+
+**What it is.** Replaces the hardware while it is built: generates contract-valid
+telemetry and replays real captures; also builds routines from the catalog.
+
+**Stack.** Python (NumPy) + TypeScript (ajv, vitest). Depends on contracts + core.
+
+**Layout.** `py/syncfit_simulator/`: `generator.py` (PPG + frames), `scenarios.py`
+(normal, fatigue, high_risk, gestational_t2), `replay.py` (`captures/`),
+`harness.py` (feeds SyncFitEngine), `routine.py` (deterministic routine builder
+with warmup/approximation/effective sets, timing, time budget), `contracts.py`.
+`typescript/src/` (generator, JSON-schema validation, reference WS client).
+
+**CLI.** `python -m syncfit_simulator --scenario high_risk --frames 3`;
+`--groups GLUTES,QUADRICEPS --language ES [--count --time-budget --no-warmup]`.
+
+**Data structures.** RingBuffer (reused from core), deque.
+
+**Run tests.** `pytest py/tests` and `cd typescript && npm test`.
