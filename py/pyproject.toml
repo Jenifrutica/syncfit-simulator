@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "SyncFit Edge simulator: synthetic and replayable telemetry (Python)."
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = { text = "Proprietary" }
 dependencies = [
     "numpy>=1.26",
     "syncfit-contracts @ git+https://github.com/Jenifrutica/syncfit-contracts.git#subdirectory=python",
