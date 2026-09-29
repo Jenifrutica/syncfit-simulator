@@ -155,6 +155,21 @@ filling the remaining slots with other catalog exercises.
 
 All code, comments, documentation and commits in this repository are written in English.
 
+## Handoff for the team
+
+**Role.** Replaces the hardware until the device is built: synthetic telemetry,
+replay of real captures, an end-to-end harness and a deterministic routine builder.
+
+**Run / test.** `python -m syncfit_simulator --list-scenarios` · `pytest py/tests`.
+
+**Entry points.** `generate_frame`/`generate_session`/`stream_session`,
+`save_capture`/`load_capture`/`replay`, `run_frames`/`run_scenario`,
+`build_routine`/`build_routine_from_request` (pattern coverage + equipment
+priorities), `validate_frame`, `to_ws_envelope`.
+
+**Interface.** Emits contract-valid `TelemetryFrame`s; the backend feeds them to
+core. TypeScript mirror for the future WS client.
+
 ## Context for a new session
 
 **What it is.** Replaces the hardware while it is built: generates contract-valid
