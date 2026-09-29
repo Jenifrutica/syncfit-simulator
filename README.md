@@ -135,6 +135,16 @@ Python 3.11+ (NumPy, `syncfit-contracts`, `syncfit-core`) and TypeScript / Node 
 - [x] Ensure all generated output validates against `syncfit-contracts`.
 - [x] Document how to run each scenario end to end.
 
+## Data structures (gym-aware routine)
+
+`build_routine` accepts `preferred_exercise_ids` and deduplicates by
+`movement_pattern` (covering the required patterns for each group first, then the
+rest). Inside `select_exercises` the ids
+are put in a **set** and each group's candidate pool is **stable-partitioned**
+(preferred first, then the rest) before the per-group limit is applied. That keeps
+the routine deterministic while building it on the athlete's gym machines first and
+filling the remaining slots with other catalog exercises.
+
 ## Related repositories
 
 - [`syncfit-contracts`](https://github.com/Jenifrutica/syncfit-contracts) — schema for generated data.

@@ -106,3 +106,32 @@ def test_activation_role_present():
 
 def _flat(groups):
     return {str(g) for g in groups}
+
+
+def test_preferred_exercises_are_selected_first():
+    from syncfit_contracts import exercises_for_groups
+
+    candidates = [
+        e for e in exercises_for_groups(["QUADRICEPS"])
+        if str(getattr(e, "role", "MAIN")) == "MAIN"
+    ]
+    assert len(candidates) >= 2
+    target = candidates[1].id
+    baseline = build_routine(["QUADRICEPS"], exercises_per_group=1)
+    assert baseline["routine"][0]["exercise_id"] != target  # not the default pick
+    preferred = build_routine(
+        ["QUADRICEPS"], exercises_per_group=1, preferred_exercise_ids=[target]
+    )
+    assert preferred["routine"][0]["exercise_id"] == target
+
+
+def test_build_routine_from_request_accepts_preferred():
+    # `hip-thrust-machine` is a required glute pattern; preferring it must win
+    # over the default variant for that pattern.
+    request = RoutineRequest(muscle_groups=["GLUTES"], language="EN", exercises_count=5)
+    result = build_routine_from_request(request, preferred_exercise_ids=["hip-thrust-machine"])
+    ids = {e["exercise_id"] for e in result["routine"]}
+    assert "hip-thrust-machine" in ids
+    # no duplicated movement pattern
+    patterns = [e.get("movement_pattern") or e["exercise_id"] for e in result["routine"]]
+    assert len(patterns) == len(set(patterns))

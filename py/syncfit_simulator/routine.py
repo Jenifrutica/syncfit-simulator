@@ -18,6 +18,8 @@ from syncfit_contracts import (
     exercises_for_groups,
     load_exercises,
     localize,
+    patterns_of,
+    required_patterns,
 )
 
 DEFAULT_EXERCISES_PER_GROUP = 2
@@ -120,10 +122,18 @@ def select_exercises(
     exercises_per_group: int = DEFAULT_EXERCISES_PER_GROUP,
     max_impact: str = "HIGH",
     roles: tuple[str, ...] = ("MAIN",),
+    preferred_ids: Iterable[str] | None = None,
 ) -> list[Exercise]:
-    """Pick catalog exercises covering every group, deduplicated and by role."""
+    """Pick catalog exercises covering every group, deduplicated and by role.
+
+    Exercises whose id is in ``preferred_ids`` (the athlete's gym machines) are
+    moved to the front of each group's pool with a stable partition, so the
+    routine is built on available machines first and completed with the rest.
+    """
+    preferred = set(preferred_ids or ())
     selected: list[Exercise] = []
     seen: set[str] = set()
+    seen_patterns: set[str] = set()
     for group in muscle_groups:
         candidates = exercises_for_groups([group])
         safe = [
@@ -133,11 +143,24 @@ def select_exercises(
             and _rank(e.impact) <= _rank(max_impact)
         ]
         pool = safe or [e for e in candidates if _value(getattr(e, "role", "MAIN")) in roles]
+        # Cover required movement patterns first; avoid repeating a pattern.
+        priority = {pattern: i for i, pattern in enumerate(required_patterns(group))}
+        pool = sorted(
+            pool,
+            key=lambda e: (
+                priority.get(patterns_of(e), 99),
+                0 if e.id in preferred else 1,
+                e.id,
+            ),
+        )
         count = 0
         for exercise in pool:
-            if exercise.id in seen:
+            pattern = patterns_of(exercise)
+            if exercise.id in seen or (pattern and pattern in seen_patterns):
                 continue
             seen.add(exercise.id)
+            if pattern:
+                seen_patterns.add(pattern)
             selected.append(exercise)
             count += 1
             if count >= exercises_per_group:
@@ -187,6 +210,7 @@ def build_routine(
     time_budget_minutes: int | None = None,
     include_warmup: bool = True,
     objective: str | None = None,
+    preferred_exercise_ids: Iterable[str] | None = None,
 ) -> dict:
     """Build a validated `RoutineResponse`-shaped dictionary."""
     groups = [_value(g) for g in muscle_groups]
@@ -201,7 +225,12 @@ def build_routine(
         per_group = exercises_per_group
         cap = None
 
-    main = select_exercises(groups, exercises_per_group=per_group, max_impact=max_impact)
+    main = select_exercises(
+        groups,
+        exercises_per_group=per_group,
+        max_impact=max_impact,
+        preferred_ids=preferred_exercise_ids,
+    )
     routine = [to_adaptation(e, language, max_impact) for e in main]
     if cap is not None:
         routine = routine[:cap]
@@ -223,7 +252,11 @@ def build_routine(
     return response.model_dump(mode="json")
 
 
-def build_routine_from_request(request: RoutineRequest, max_impact: str = "HIGH") -> dict:
+def build_routine_from_request(
+    request: RoutineRequest,
+    max_impact: str = "HIGH",
+    preferred_exercise_ids: Iterable[str] | None = None,
+) -> dict:
     """Build a routine directly from a contract request."""
     groups = [_value(g) for g in request.muscle_groups]
     return build_routine(
@@ -236,6 +269,7 @@ def build_routine_from_request(request: RoutineRequest, max_impact: str = "HIGH"
         time_budget_minutes=request.time_budget_minutes,
         include_warmup=request.include_warmup,
         objective=_value(request.objective) if request.objective else None,
+        preferred_exercise_ids=preferred_exercise_ids,
     )
 
 
