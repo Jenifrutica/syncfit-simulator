@@ -189,3 +189,11 @@ with warmup/approximation/effective sets, timing, time budget), `contracts.py`.
 **Data structures.** RingBuffer (reused from core), deque.
 
 **Run tests.** `pytest py/tests` and `cd typescript && npm test`.
+
+## Roadmap · Qué falta (español)
+
+> Estado: **implementado** (generador, replay, harness y constructor de rutinas).
+
+- Poblar `captures/` con **capturas reales** cuando llegue el hardware.
+- Definir escenarios en `scenarios/` si se requieren variantes nuevas.
+- (Opcional) Paridad exacta Python/TypeScript del generador de PPG.
