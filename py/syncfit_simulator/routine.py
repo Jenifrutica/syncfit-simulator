@@ -131,11 +131,20 @@ def select_exercises(
     routine is built on available machines first and completed with the rest.
     """
     preferred = set(preferred_ids or ())
+    groups = [_value(g) for g in muscle_groups]
+    # A single-muscle request stays focused: full-body lifts are not offered
+    # (a thruster is not a quad exercise) and patterns may repeat with a
+    # different exercise when the group has fewer patterns than the count.
+    focus = len(groups) == 1 and groups[0] != "FULL_BODY"
     selected: list[Exercise] = []
     seen: set[str] = set()
     seen_patterns: set[str] = set()
     for group in muscle_groups:
-        candidates = exercises_for_groups([group])
+        candidates = [
+            exercise
+            for exercise in exercises_for_groups([group])
+            if not (focus and "FULL_BODY" in {_value(g) for g in exercise.muscle_groups})
+        ]
         safe = [
             e
             for e in candidates
@@ -154,15 +163,22 @@ def select_exercises(
             ),
         )
         count = 0
-        for exercise in pool:
-            pattern = patterns_of(exercise)
-            if exercise.id in seen or (pattern and pattern in seen_patterns):
-                continue
-            seen.add(exercise.id)
-            if pattern:
-                seen_patterns.add(pattern)
-            selected.append(exercise)
-            count += 1
+        # First pass: new movement patterns. Second pass: repeat a pattern with
+        # a different exercise (e.g. squat + leg press).
+        for repeat in (False, True):
+            for exercise in pool:
+                if count >= exercises_per_group:
+                    break
+                if exercise.id in seen:
+                    continue
+                pattern = patterns_of(exercise)
+                if not repeat and pattern and pattern in seen_patterns:
+                    continue
+                seen.add(exercise.id)
+                if pattern:
+                    seen_patterns.add(pattern)
+                selected.append(exercise)
+                count += 1
             if count >= exercises_per_group:
                 break
     return selected
