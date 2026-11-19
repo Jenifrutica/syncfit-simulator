@@ -18,3 +18,10 @@ def test_groups_prints_a_routine_as_json(capsys):
     routine = json.loads(capsys.readouterr().out)
     assert routine["language"] == "ES"
     assert routine["muscle_groups"] == ["GLUTES"]
+
+
+def test_save_without_running_writes_a_capture(tmp_path, capsys):
+    target = tmp_path / "capture.json"
+    assert main(["--scenario", "normal", "--frames", "2", "--save", str(target), "--no-run"]) == 0
+    assert "saved 2 frames" in capsys.readouterr().out
+    assert target.exists() and target.stat().st_size > 0
