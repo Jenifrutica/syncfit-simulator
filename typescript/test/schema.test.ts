@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { generateFrame } from "../src/generator.js";
-import { createTelemetryValidator, resolveSchemaDir } from "../src/schema.js";
+import { assertValidFrame, createTelemetryValidator, resolveSchemaDir } from "../src/schema.js";
 import { getScenario } from "../src/scenarios.js";
 
 const schemaDir = resolveSchemaDir();
@@ -19,6 +19,12 @@ describeIfSchemas("contract validation (schemas found)", () => {
     const frame = generateFrame(getScenario("normal"), { sessionId: SESSION });
     frame.biomarkers.rmssd_hrv_ms = 9999;
     expect(validator?.(frame)).toBe(false);
+  });
+
+  it("names the offending field when a frame is invalid", () => {
+    const frame = generateFrame(getScenario("normal"), { sessionId: SESSION });
+    frame.biomarkers.rmssd_hrv_ms = 9999;
+    expect(() => assertValidFrame(frame)).toThrowError(/rmssd_hrv_ms/);
   });
 
   it("rejects a wrong sample rate", () => {
