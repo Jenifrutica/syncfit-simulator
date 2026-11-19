@@ -1,5 +1,7 @@
 # SyncFit Simulator
 
+**Live app:** https://syncfit.jenilarper.dev
+
 Polyglot test harness that removes the dependency on physical hardware. It replays real captures and generates synthetic telemetry so that backend, core and frontend can be developed, tested and demonstrated before the device is assembled.
 
 ## Purpose
